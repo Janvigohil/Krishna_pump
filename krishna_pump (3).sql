@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 05, 2025 at 03:33 PM
+-- Generation Time: Sep 06, 2025 at 03:10 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -59,7 +59,94 @@ CREATE TABLE `advance_salary` (
 --
 
 INSERT INTO `advance_salary` (`id`, `worker_id`, `date_advance`, `amount`, `cash_gpay`) VALUES
-(1, 1, '2025-08-05', 1500.00, 'cash');
+(1, 1, '2025-08-05', 1500.00, 'cash'),
+(2, 1, '2025-08-06', 500.00, 'gpay');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `companies`
+--
+
+CREATE TABLE `companies` (
+  `id` int(11) NOT NULL,
+  `name` varchar(120) NOT NULL,
+  `status` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `companies`
+--
+
+INSERT INTO `companies` (`id`, `name`, `status`, `created_at`) VALUES
+(1, 'SEVRLAKE', 1, '2025-08-24 09:18:41'),
+(2, 'HINDUSTAN', 1, '2025-08-24 09:18:41'),
+(3, 'FLOTECH', 1, '2025-08-24 09:18:41'),
+(4, 'KAVERI', 1, '2025-08-24 09:18:41');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `coupons`
+--
+
+CREATE TABLE `coupons` (
+  `id` int(11) NOT NULL,
+  `company_id` int(11) NOT NULL,
+  `coupon_no` varchar(50) NOT NULL,
+  `entry_date` date NOT NULL,
+  `remaining_payment` decimal(12,2) DEFAULT NULL,
+  `total_balance` decimal(12,2) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `coupons`
+--
+
+INSERT INTO `coupons` (`id`, `company_id`, `coupon_no`, `entry_date`, `remaining_payment`, `total_balance`, `created_at`) VALUES
+(1, 1, '13', '2025-08-22', NULL, 31200.00, '2025-08-24 09:18:42'),
+(2, 1, '13', '2025-09-02', NULL, 9600.00, '2025-08-24 09:18:42'),
+(3, 4, '14', '2025-08-28', NULL, NULL, '2025-08-28 09:07:17'),
+(4, 1, '14', '2025-08-28', NULL, NULL, '2025-08-28 09:17:49'),
+(5, 1, '15', '2025-08-28', NULL, NULL, '2025-08-28 09:22:00'),
+(6, 3, '12', '2025-08-28', NULL, NULL, '2025-08-28 10:24:37');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `coupon_items`
+--
+
+CREATE TABLE `coupon_items` (
+  `id` int(11) NOT NULL,
+  `coupon_id` int(11) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `qty` int(11) NOT NULL DEFAULT 1,
+  `price` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `line_total` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `type` enum('debit','credit') NOT NULL DEFAULT 'debit'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `coupon_items`
+--
+
+INSERT INTO `coupon_items` (`id`, `coupon_id`, `description`, `qty`, `price`, `line_total`, `created_at`, `type`) VALUES
+(1, 1, 'SP 0.5 HP', 8, 1200.00, 9600.00, '2025-08-24 09:18:42', 'credit'),
+(2, 1, 'SP 0.75 HP', 2, 3600.00, 7200.00, '2025-08-24 09:18:42', 'credit'),
+(3, 1, 'SP 0.55 HP', 3, 4800.00, 14400.00, '2025-08-24 09:18:42', 'credit'),
+(4, 2, 'SP 0.5 HP', 2, 1200.00, 2400.00, '2025-08-24 09:18:42', 'debit'),
+(5, 2, 'SP 0.75 HP', 2, 3600.00, 7200.00, '2025-08-24 09:18:42', 'debit'),
+(6, 3, 'sp 0.75 HP  ', 5, 4500.00, 22500.00, '2025-08-28 09:07:17', 'credit'),
+(7, 4, 'sp 0.75 HP  ', 5, 1500.00, 7500.00, '2025-08-28 09:17:49', 'credit'),
+(8, 5, 'sp 0.55 HP  ', 5, 2500.00, 12500.00, '2025-08-28 09:22:00', 'credit'),
+(9, 5, 'sp 0.5', 2, 1200.00, 2400.00, '2025-08-28 09:22:00', 'credit'),
+(10, 6, 'sp 0.75 HP  ', 5, 1200.00, 6000.00, '2025-08-28 10:24:37', 'credit'),
+(11, 6, 'SP 0.5 Hp ', 3, 4500.00, 13500.00, '2025-08-28 10:24:37', 'credit'),
+(12, 6, 'sp 0.75 HP  ', 2, 1200.00, 2400.00, '2025-08-28 10:25:00', 'debit');
 
 -- --------------------------------------------------------
 
@@ -84,7 +171,10 @@ CREATE TABLE `customer_bill` (
 
 INSERT INTO `customer_bill` (`id`, `work_no`, `customer_name`, `contact_no`, `cost`, `bill_amount`, `date`) VALUES
 (1, '', 'Rakeshbhai', '9985746325', 0.00, 2000.00, '2025-08-05'),
-(2, '', 'Rakeshbhai', '9985746325', 0.00, 1500.00, '2025-08-05');
+(2, '', 'Rakeshbhai', '9985746325', 0.00, 1500.00, '2025-08-05'),
+(3, '', 'Rajesh Bhai', '8956784527', 0.00, 3000.00, '2025-08-06'),
+(4, '', 'Rajesh Bhai', '8956784527', 0.00, 1000.00, '2025-08-12'),
+(5, '', 'Rajesh Bhai', '8956784527', 0.00, 2500.00, '2025-08-28');
 
 -- --------------------------------------------------------
 
@@ -109,7 +199,17 @@ INSERT INTO `customer_motor_work` (`id`, `bill_id`, `part_id`) VALUES
 (4, 1, 36),
 (5, 2, 9),
 (6, 2, 9),
-(7, 2, 39);
+(7, 2, 39),
+(8, 3, 5),
+(9, 3, 5),
+(10, 3, 21),
+(11, 3, 40),
+(12, 4, 5),
+(13, 4, 5),
+(14, 4, 19),
+(15, 4, 36),
+(16, 5, 1),
+(17, 5, 40);
 
 -- --------------------------------------------------------
 
@@ -168,10 +268,10 @@ INSERT INTO `motor_parts` (`id`, `name`, `cost`, `group_id`) VALUES
 (10, 'SEAL 12 MM WITHOUT CERAMIC', 30.00, 2),
 (11, 'SEAL 16 MM WITH CERAMIC', 40.00, 2),
 (12, 'SEAL 16 MM WITHOUT CERAMIC', 40.00, 2),
-(13, 'CAPACITOR 12.5 MFD', 35.00, 4),
-(14, 'CAPACITOR 15 MFD', 40.00, 4),
-(15, 'CAPACITOR 20 MFD', 60.00, 4),
-(16, 'CAPACITOR 25 MFD', 70.00, 4),
+(13, ' 12.5 MFD', 35.00, 4),
+(14, ' 15 MFD', 40.00, 4),
+(15, ' 20 MFD', 60.00, 4),
+(16, ' 25 MFD', 70.00, 4),
 (17, 'FAN 12 MM', 10.00, 5),
 (18, 'FAN 16 MM', 10.00, 5),
 (19, 'DABRA SET 82 MM DABRA', 350.00, 7),
@@ -190,7 +290,12 @@ INSERT INTO `motor_parts` (`id`, `name`, `cost`, `group_id`) VALUES
 (37, '30.40.30', 189.00, 9),
 (38, 'CAPACITOR 50 MFD', 115.00, 4),
 (39, '18-28-28', 116.00, 9),
-(40, '22-30-30', 110.00, 9);
+(40, '22-30-30', 110.00, 9),
+(41, '6206 NCB', 315.00, 1),
+(42, '6306 NBC', 355.00, 1),
+(44, '80-100 MDF', 0.00, 4),
+(46, '100-120 MDF', 0.00, 4),
+(47, '120-150 MDF', 0.00, 4);
 
 -- --------------------------------------------------------
 
@@ -251,7 +356,29 @@ INSERT INTO `worker_motor_work` (`id`, `work_id`, `part_id`) VALUES
 (22, 7, 9),
 (23, 7, 24),
 (24, 8, 5),
-(25, 8, 5);
+(25, 8, 5),
+(26, 9, 5),
+(27, 9, 17),
+(28, 9, 22),
+(29, 10, 5),
+(30, 10, 5),
+(31, 10, 9),
+(32, 10, 22),
+(33, 11, 17),
+(34, 11, 41),
+(35, 12, 19),
+(36, 12, 39),
+(37, 12, 35),
+(38, 12, 18),
+(39, 12, 35),
+(40, 13, 9),
+(41, 13, 39),
+(42, 13, 41),
+(43, 13, 5),
+(44, 14, 39),
+(45, 14, 28),
+(46, 14, 41),
+(47, 14, 17);
 
 -- --------------------------------------------------------
 
@@ -263,8 +390,8 @@ CREATE TABLE `worker_work` (
   `id` int(11) NOT NULL,
   `work_no` varchar(50) NOT NULL,
   `work_date` date NOT NULL DEFAULT curdate(),
-  `cost` decimal(10,2) NOT NULL,
-  `bill` decimal(10,2) NOT NULL,
+  `cost` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `bill` decimal(10,2) DEFAULT NULL,
   `margin` decimal(10,2) GENERATED ALWAYS AS (`bill` - `cost`) STORED,
   `salary` decimal(10,2) GENERATED ALWAYS AS ((`bill` - `cost`) * 0.5) STORED,
   `worker_id` int(11) NOT NULL
@@ -282,7 +409,13 @@ INSERT INTO `worker_work` (`id`, `work_no`, `work_date`, `cost`, `bill`, `worker
 (5, 'WK20250805-5120', '2025-08-05', 200.00, 800.00, 1),
 (6, 'WK20250805-8220', '2025-08-05', 450.00, 900.00, 1),
 (7, 'WK20250805-4801', '2025-08-05', 350.00, 800.00, 1),
-(8, 'WK20250805-8193', '2025-08-05', 80.00, 150.00, 1);
+(8, 'WK20250805-8193', '2025-08-05', 80.00, 150.00, 1),
+(9, 'WK20250806-5832', '2025-08-06', 200.00, 500.00, 1),
+(10, 'WK20250812-9818', '2025-08-12', 300.00, 800.00, 1),
+(11, 'WK20250820-3963', '2025-08-20', 400.00, 800.00, 1),
+(12, 'WK20250820-5717', '2025-08-20', 486.00, 1200.00, 1),
+(13, 'WK20250820-7922', '2025-08-20', 500.00, 1500.00, 1),
+(14, 'WK20250828-8618', '2025-08-28', 541.00, 800.00, 1);
 
 --
 -- Indexes for dumped tables
@@ -300,6 +433,27 @@ ALTER TABLE `admin`
 ALTER TABLE `advance_salary`
   ADD PRIMARY KEY (`id`),
   ADD KEY `worker_id` (`worker_id`);
+
+--
+-- Indexes for table `companies`
+--
+ALTER TABLE `companies`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
+-- Indexes for table `coupons`
+--
+ALTER TABLE `coupons`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_coupon` (`company_id`,`coupon_no`,`entry_date`);
+
+--
+-- Indexes for table `coupon_items`
+--
+ALTER TABLE `coupon_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_item_coupon` (`coupon_id`);
 
 --
 -- Indexes for table `customer_bill`
@@ -326,7 +480,8 @@ ALTER TABLE `motor_groups`
 --
 ALTER TABLE `motor_parts`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `group_id` (`group_id`);
+  ADD KEY `group_id` (`group_id`),
+  ADD KEY `id` (`id`);
 
 --
 -- Indexes for table `workers`
@@ -347,7 +502,9 @@ ALTER TABLE `worker_motor_work`
 --
 ALTER TABLE `worker_work`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `worker_id` (`worker_id`);
+  ADD KEY `worker_id` (`worker_id`),
+  ADD KEY `id` (`id`),
+  ADD KEY `work_date` (`work_date`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -363,19 +520,37 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `advance_salary`
 --
 ALTER TABLE `advance_salary`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `companies`
+--
+ALTER TABLE `companies`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `coupons`
+--
+ALTER TABLE `coupons`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `coupon_items`
+--
+ALTER TABLE `coupon_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `customer_bill`
 --
 ALTER TABLE `customer_bill`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `customer_motor_work`
 --
 ALTER TABLE `customer_motor_work`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `motor_groups`
@@ -387,7 +562,7 @@ ALTER TABLE `motor_groups`
 -- AUTO_INCREMENT for table `motor_parts`
 --
 ALTER TABLE `motor_parts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 
 --
 -- AUTO_INCREMENT for table `workers`
@@ -399,13 +574,13 @@ ALTER TABLE `workers`
 -- AUTO_INCREMENT for table `worker_motor_work`
 --
 ALTER TABLE `worker_motor_work`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 
 --
 -- AUTO_INCREMENT for table `worker_work`
 --
 ALTER TABLE `worker_work`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- Constraints for dumped tables
@@ -416,6 +591,18 @@ ALTER TABLE `worker_work`
 --
 ALTER TABLE `advance_salary`
   ADD CONSTRAINT `advance_salary_ibfk_1` FOREIGN KEY (`worker_id`) REFERENCES `workers` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `coupons`
+--
+ALTER TABLE `coupons`
+  ADD CONSTRAINT `fk_coupon_company` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `coupon_items`
+--
+ALTER TABLE `coupon_items`
+  ADD CONSTRAINT `fk_item_coupon` FOREIGN KEY (`coupon_id`) REFERENCES `coupons` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `customer_motor_work`
