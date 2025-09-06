@@ -1,0 +1,14 @@
+{
+    "parts": [
+        {
+            "id": "9",
+            "name": "SEAL 12 MM WITH CERAMIC",
+            "cost": 30
+        }
+    ],
+    "total_cost": 30,
+    "bill_amount": 120,
+    "worker_ids": [
+        "1"
+    ]
+}
