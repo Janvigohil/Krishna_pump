@@ -3,16 +3,17 @@ require 'dompdf/vendor/autoload.php';
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
-// 🔹 Collect form data
+// Input Data (replace with $_POST in production)
 $invoice_no   = $_POST['invoice_no'] ?? '001';
 $invoice_date = $_POST['date'] ?? date('d-m-Y');
 $name         = $_POST['name'] ?? 'Customer Name';
-$address      = $_POST['address'] ?? 'Customer Contact';
-$payment      = $_POST['payment_method'] ?? 'Cash';
+$address      = $_POST['address'] ?? 'Customer Address';
+$bho          = $_POST['bho'] ?? '';
+$items        = $_POST['items'] ?? [
+    ['desc' => 'Motor Repairing Work', 'price' => 1500],
+    ['desc' => 'New Motor Installed', 'price' => 3500]
+];
 
-$items        = $_POST['items'] ?? []; // items[0][desc], items[0][price]
-
-// 🔹 Prepare rows
 $total = 0;
 $rows = '';
 foreach ($items as $i => $item) {
@@ -21,23 +22,23 @@ foreach ($items as $i => $item) {
     $total += $price;
     $rows .= "
         <tr>
-            <td style='width:10%; text-align:center;'>".($i+1)."</td>
-            <td style='width:70%;'>$desc</td>
-            <td style='width:20%; text-align:right;'>".number_format($price,2)."</td>
+            <td style='text-align:center;'>".($i+1)."</td>
+            <td>$desc</td>
+            <td style='text-align:right;'>".number_format($price,2)."</td>
         </tr>
     ";
 }
 
-// Always show at least 8 rows for consistent height
+// Always show 12 rows (add empty ones if fewer)
 $max_rows = 8;
 $current_rows = count($items);
 if ($current_rows < $max_rows) {
     for ($j = $current_rows; $j < $max_rows; $j++) {
         $rows .= "
             <tr>
-                <td style='width:10%; text-align:center;'>&nbsp;</td>
-                <td style='width:70%;'>&nbsp;</td>
-                <td style='width:20%; text-align:right;'>&nbsp;</td>
+                <td style='text-align:center;'>&nbsp;</td>
+                <td>&nbsp;</td>
+                <td style='text-align:right;'>&nbsp;</td>
             </tr>
         ";
     }
@@ -49,7 +50,7 @@ ob_start();
 <html>
 <head>
     <meta charset="utf-8">
-   <style>
+    <style>
         body { font-family: DejaVu Sans, sans-serif; font-size: 12px; }
         .container { border: 3px solid #000; padding: 8px; border-radius: 12px; }
         .header, .address-bar, .details, .items, .note {
@@ -79,9 +80,15 @@ ob_start();
 
         <!-- Header -->
         <div class="header">
-            <div class="contact">+91 99797 34485</div>
+            <div>
+                <table>
+                    <tr>
+                        <td> <div class="contact">+91 99797 34485</div></td>
+                        <td style="text-align: right;"> <div class="contact" >+91 96627 74770</div></td>
+                    </tr>
+                </table>
+            </div>
             <div class="company">Krishna Pump</div>
-            <div class="contact">+91 96627 74770</div>
         </div>
 
         <!-- Address -->
@@ -96,26 +103,26 @@ ob_start();
                 <td><b>Bill No.:</b> <?= $invoice_no ?></td>
             </tr>
             <tr>
-                <td><b>Address / Contact:</b> <?= $address ?></td>
+                <td><b>Address:</b> <?= $address ?></td>
                 <td><b>Date:</b> <?= $invoice_date ?></td>
             </tr>
             <tr>
-                <td><b>Payment Method:</b> <?= $payment ?></td>
+                <td><b>MO :</b> <?= $bho ?></td>
                 <td></td>
             </tr>
         </table>
 
         <!-- Items -->
-        <table class="items">
-            <tr>
+        <table class="items" >
+            <tr style="margine: 10px;">
                 <th style="width:10%;">No.</th>
                 <th style="width:70%;">Description</th>
-                <th style="width:20%;">Price</th>
+                <th style="width:20%;">price</th>
             </tr>
             <?= $rows ?>
             <tr class="total-row">
                 <td colspan="2" style="text-align:right;">Total</td>
-                <td style="text-align:right; font-size: 14px;"><?= number_format($total,2) ?></td>
+                <td style="text-align:right; font-size: 15px;"><?= number_format($total,2) ?></td>
             </tr>
         </table>
 
@@ -128,7 +135,7 @@ ob_start();
 
         <!-- Footer -->
         <div class="footer">
-            For, Krishna Pump
+            Four, Krishna Pump
         </div>
     </div>
 </body>
@@ -136,7 +143,6 @@ ob_start();
 <?php
 $html = ob_get_clean();
 
-// 🔹 Generate PDF
 $options = new Options();
 $options->set('isRemoteEnabled', true);
 $dompdf = new Dompdf($options);
@@ -144,5 +150,7 @@ $dompdf->loadHtml($html);
 $dompdf->setPaper('A4', 'portrait');
 $dompdf->render();
 
+// Output PDF
 $filename = "invoice_" . time() . ".pdf";
 $dompdf->stream($filename, ["Attachment" => 1]);
+?>

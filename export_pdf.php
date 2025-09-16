@@ -54,6 +54,27 @@ ob_start();
     th { background:#f2f2f2; }
     .right { text-align:right; }
     .center { text-align:center; }
+    .grand-total { 
+  background: #f7e9d9ff; 
+  font-weight: bold; 
+  color : blue;
+    font-size: 15px;
+
+}
+.salary{
+    background: #f7e9d9ff; 
+      font-weight: bold; 
+      text-align: center;
+  font-size: 15px;
+  color : green;
+}
+.advance{
+  background: #f7e9d9ff; 
+    font-weight: bold; 
+    text-align: center;
+    font-size: 15px;
+  color : red;
+}
   </style>
 </head>
 <body>
@@ -109,15 +130,15 @@ ob_start();
         <th class="right"><?= number_format($grand_cost,2) ?></th>
         <th class="right"><?= number_format($grand_bill,2) ?></th>
         <th class="right"><?= number_format($grand_margin,2) ?></th>
-        <th class="right"><?= number_format($grand_salary,2) ?></th>
+        <th class="right" class="grand-total"><?= number_format($grand_salary,2) ?></th>
       </tr>
       <tr>
         <td colspan="6" class="right"><b>Advance Taken</b></td>
-        <td class="right">- <?= number_format($total_advance,2) ?></td>
+        <td class="right" class="advance">- <?= number_format($total_advance,2) ?></td>
       </tr>
       <tr>
         <td colspan="6" class="right"><b>Remaining Salary</b></td>
-        <td class="right"><?= number_format($grand_salary-$total_advance,2) ?></td>
+        <td class="right" class="salary"><?= number_format($grand_salary-$total_advance,2) ?></td>
       </tr>
     </tfoot>
   </table>
@@ -134,5 +155,12 @@ $dompdf->loadHtml($html);
 $dompdf->setPaper('A4', 'landscape');
 $dompdf->render();
 
-// Output
-$dompdf->stream("worker_report_{$worker_id}.pdf", ["Attachment"=>1]);
+// Output// Format dates for filename
+$startLabel = $from ? date('d-m-Y', strtotime($from)) : 'start';
+$endLabel   = $to   ? date('d-m-Y', strtotime($to))   : 'end';
+
+// Build filename: workername-startDate-endDate.pdf
+$filename = preg_replace('/[^A-Za-z0-9_\-]/', '_', $worker['name']) . "_{$startLabel}_to_{$endLabel}.pdf";
+
+// Output PDF with custom filename
+$dompdf->stream($filename, ["Attachment" => 1]);

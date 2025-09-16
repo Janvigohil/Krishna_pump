@@ -68,12 +68,12 @@ if ($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['add_advance'])) {
     td.parts-col{font-size:16px;white-space:normal;max-width:280px;}
     input.inline-edit{width:90px;font-size:13px;text-align:right;font-weight:bold;border:1px solid #bbb;border-radius:4px;padding:2px 4px;}
     input.inline-edit.cost,input.inline-edit.bill {font-size:16px;font-weight:bold;padding:2px 4px;text-align:right;}
+    .delete-work{padding:2px 6px;}
   </style>
 </head>
 <body>
 <?php include 'sidebar.php'; ?>
 
-<!-- 👇 Wrap all page content inside main-wrapper (required for sidebar collapse effect) -->
 <div class="main-wrapper">
 
   <!-- Navbar -->
@@ -106,9 +106,12 @@ if ($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['add_advance'])) {
 
     <!-- Work table -->
     <div class="table-responsive mb-4">
-      <table class="table table-bordered table-sm table-hover align-middle">
+      <table class="table table-bordered table-sm table-hover align-middle" id="workTable">
         <thead class="table-primary">
-          <tr><th>Date</th><th>Sr</th><th>Parts</th><th>Cost</th><th>Bill</th><th>Margin</th><th>Salary (50%)</th></tr>
+          <tr>
+            <th>Date</th><th>Sr</th><th>Parts</th><th>Cost</th><th>Bill</th>
+            <th>Margin</th><th>Salary (50%)</th><th>Action</th>
+          </tr>
         </thead>
         <tbody>
           <?php
@@ -121,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['add_advance'])) {
               $day_cost+=$cost;$day_bill+=$bill;$day_margin+=$margin;$day_salary+=$salary;
               $grand_cost+=$cost;$grand_bill+=$bill;$grand_margin+=$margin;$grand_salary+=$salary;
           ?>
-          <tr data-id="<?= $row['id'] ?>">
+          <tr data-id="<?= $row['id'] ?>" data-date="<?= $date ?>">
             <td><?= $sr===1?date('d-m-Y',strtotime($date)):'' ?></td>
             <td><?= $sr++ ?></td>
             <td class="parts-col"><?= htmlspecialchars($row['parts']) ?></td>
@@ -129,21 +132,23 @@ if ($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['add_advance'])) {
             <td><input type="number" class="inline-edit bill" value="<?= $bill ?>"></td>
             <td class="margin">₹<?= number_format($margin,2) ?></td>
             <td class="salary text-success fw-bold">₹<?= number_format($salary,2) ?></td>
+            <td><button class="btn btn-sm btn-danger delete-work"><i class="bi bi-trash"></i></button></td>
           </tr>
           <?php endforeach; ?>
-          <tr class="table-light">
+          <tr class="table-light day-total" data-date="<?= $date ?>">
             <td colspan="3">Total (<?= date('d-m-Y',strtotime($date)) ?>)</td>
-            <td>₹<?= number_format($day_cost,2) ?></td>
-            <td>₹<?= number_format($day_bill,2) ?></td>
-            <td>₹<?= number_format($day_margin,2) ?></td>
-            <td class="fw-bold">₹<?= number_format($day_salary,2) ?></td>
+            <td class="day-cost">₹<?= number_format($day_cost,2) ?></td>
+            <td class="day-bill">₹<?= number_format($day_bill,2) ?></td>
+            <td class="day-margin">₹<?= number_format($day_margin,2) ?></td>
+            <td class="day-salary fw-bold">₹<?= number_format($day_salary,2) ?></td>
+            <td></td>
           </tr>
           <?php endforeach; ?>
         </tbody>
         <tfoot class="table-secondary">
-          <tr><th colspan="3">Grand Total</th><th>₹<?= number_format($grand_cost,2) ?></th><th>₹<?= number_format($grand_bill,2) ?></th><th>₹<?= number_format($grand_margin,2) ?></th><th class="text-success">₹<?= number_format($grand_salary,2) ?></th></tr>
-          <tr><td colspan="6" class="text-end">Advance Taken</td><td class="text-danger">- ₹<?= number_format($total_advance,2) ?></td></tr>
-          <tr><td colspan="6" class="text-end">Remaining Salary</td><td class="text-primary fw-bold">₹<?= number_format($grand_salary-$total_advance,2) ?></td></tr>
+          <tr><th colspan="3">Grand Total</th><th id="grandCost">₹<?= number_format($grand_cost,2) ?></th><th id="grandBill">₹<?= number_format($grand_bill,2) ?></th><th id="grandMargin">₹<?= number_format($grand_margin,2) ?></th><th id="grandSalary" class="text-success">₹<?= number_format($grand_salary,2) ?></th><th></th></tr>
+          <tr><td colspan="6" class="text-end">Advance Taken</td><td id="advanceTaken" class="text-danger">- ₹<?= number_format($total_advance,2) ?></td><td></td></tr>
+          <tr><td colspan="6" class="text-end">Remaining Salary</td><td id="remainingSalary" class="text-primary fw-bold">₹<?= number_format($grand_salary-$total_advance,2) ?></td><td></td></tr>
         </tfoot>
       </table>
     </div>
@@ -194,11 +199,43 @@ if ($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['add_advance'])) {
       </table>
     </div>
 
-  </div><!-- /main-content -->
-
-</div><!-- /main-wrapper -->
+  </div>
+</div>
 
 <script>
+function recalcTotals() {
+  let grandCost=0, grandBill=0, grandMargin=0, grandSalary=0;
+
+  document.querySelectorAll(".day-total").forEach(dayRow=>{
+    const date=dayRow.dataset.date;
+    let dayCost=0, dayBill=0, dayMargin=0, daySalary=0;
+
+    document.querySelectorAll(`tr[data-date='${date}']`).forEach(tr=>{
+      if(tr.classList.contains("day-total")) return;
+      const cost=parseFloat(tr.querySelector(".cost").value)||0;
+      const bill=parseFloat(tr.querySelector(".bill").value)||0;
+      const margin=bill-cost, salary=margin/2;
+      dayCost+=cost; dayBill+=bill; dayMargin+=margin; daySalary+=salary;
+    });
+
+    dayRow.querySelector(".day-cost").textContent="₹"+dayCost.toFixed(2);
+    dayRow.querySelector(".day-bill").textContent="₹"+dayBill.toFixed(2);
+    dayRow.querySelector(".day-margin").textContent="₹"+dayMargin.toFixed(2);
+    dayRow.querySelector(".day-salary").textContent="₹"+daySalary.toFixed(2);
+
+    grandCost+=dayCost; grandBill+=dayBill; grandMargin+=dayMargin; grandSalary+=daySalary;
+  });
+
+  document.getElementById("grandCost").textContent="₹"+grandCost.toFixed(2);
+  document.getElementById("grandBill").textContent="₹"+grandBill.toFixed(2);
+  document.getElementById("grandMargin").textContent="₹"+grandMargin.toFixed(2);
+  document.getElementById("grandSalary").textContent="₹"+grandSalary.toFixed(2);
+
+  const advance=parseFloat(document.getElementById("advanceTaken").textContent.replace(/[^0-9.-]/g,''))||0;
+  document.getElementById("remainingSalary").textContent="₹"+(grandSalary-advance).toFixed(2);
+}
+
+// inline edit update
 document.querySelectorAll('.inline-edit').forEach(inp=>{
   inp.addEventListener('change',async e=>{
     const tr=e.target.closest('tr');
@@ -208,10 +245,36 @@ document.querySelectorAll('.inline-edit').forEach(inp=>{
     const margin=bill-cost, salary=margin/2;
     tr.querySelector('.margin').innerHTML='₹'+margin.toFixed(2);
     tr.querySelector('.salary').innerHTML='₹'+salary.toFixed(2);
+
+    recalcTotals();
+
     await fetch('update_work.php',{
       method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({id,cost,bill})
     });
+  });
+});
+
+// delete work
+document.querySelectorAll('.delete-work').forEach(btn=>{
+  btn.addEventListener('click',async e=>{
+    e.preventDefault();
+    if(!confirm("Are you sure you want to delete this work?")) return;
+    const tr=btn.closest('tr');
+    const id=tr.dataset.id;
+
+    const res=await fetch('delete_work.php',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({id})
+    });
+    const data=await res.json();
+
+    if(data.success){
+      tr.remove();
+      recalcTotals();
+    }else{
+      alert("Delete failed!");
+    }
   });
 });
 </script>

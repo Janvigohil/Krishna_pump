@@ -2,8 +2,8 @@
 include 'db_config.php'; 
 include 'sidebar.php'; 
 
-// Fetch all companies
-$sql = "SELECT id, name FROM companies WHERE status=1 ORDER BY name ASC";
+// Fetch all companies in insertion order
+$sql = "SELECT id, name FROM companies WHERE status=1 ORDER BY id ASC";
 $result = $conn->query($sql);
 ?>
 

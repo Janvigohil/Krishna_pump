@@ -27,8 +27,6 @@ while ($p = $resP->fetch_assoc()) {
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body{background:#f4f5fa}
-    
-
     .group-img{cursor:pointer;width:70px;height:70px;margin:4px;object-fit:contain;
                border-radius:8px;border:2px solid transparent;transition:.2s}
     .group-img:hover{border-color:#0d6efd;transform:scale(1.03)}
@@ -40,23 +38,10 @@ while ($p = $resP->fetch_assoc()) {
     .worker-bar{background:#f8f9fa;padding:6px 12px;margin-bottom:10px;
                 border:1px solid #dee2e6;border-radius:6px;display:flex;justify-content:space-between;align-items:center}
     .bold-input{font-weight:bold;}
-    .modal-backdrop {
-    margin-left: 250px; /* sidebar width */
-    width: calc(100% - 250px);
-  }
-  <style>
-  #workerModal .modal-dialog {
-    margin-left: 250px; /* shift modal with content */
-  }
-
   </style>
 </head>
 <body>
 <?php include 'sidebar.php'; ?>
-
-<nav class="navbar navbar-light bg-white shadow-sm px-4" style="margin-left:250px">
-  <div class="container-fluid"><h4 class="mb-0">Add Work</h4></div>
-</nav>
 
 <div class="main" style="margin-left:250px;padding:20px;max-width:1200px;">
   <!-- worker info bar -->
@@ -89,11 +74,15 @@ while ($p = $resP->fetch_assoc()) {
         </div>
       </div>
 
-      <!-- RIGHT: Selected parts + cost/bill -->
+      <!-- RIGHT: Selected parts + cost/bill + date -->
       <div class="col-lg-6">
         <div class="card border-0 shadow-sm">
           <div class="card-header bg-info text-white">Work Details</div>
           <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label">Work Date</label>
+              <input type="date" id="workDate" class="form-control" value="<?= date('Y-m-d') ?>">
+            </div>
             <div id="selected-pills" class="mb-2"></div>
             <div class="row g-2 mb-3">
               <div class="col-6">
@@ -127,7 +116,7 @@ while ($p = $resP->fetch_assoc()) {
             </thead>
             <tbody>
               <tr>
-                <td><?= date('d-m-Y') ?></td>
+                <td id="previewDate"><?= date('d-m-Y') ?></td>
                 <td>1</td>
                 <td id="previewParts" class="small text-wrap"></td>
                 <td id="previewCost">₹0.00</td>
@@ -206,21 +195,35 @@ function addPart(id,name,cost){
   pill.innerHTML=`${name} (${fmt(cost)}) <span class="x">&times;</span>`;
   pill.querySelector('.x').onclick=()=>{ 
     const idx=[...pill.parentNode.children].indexOf(pill);
-    selectedPartIds.splice(idx,1);selectedPartNames.splice(idx,1);selectedPartCosts.splice(idx,1);
-    pill.remove();updatePreview();
+    selectedPartIds.splice(idx,1);
+    selectedPartNames.splice(idx,1);
+    selectedPartCosts.splice(idx,1);
+    pill.remove();
+    recalcCost();
+    updatePreview();
   };
   document.getElementById('selected-pills').appendChild(pill);
-  if(!manualCost) {
+  recalcCost();
+  updatePreview();
+}
+
+function recalcCost(){
+  if(!manualCost){
     const costVal=selectedPartCosts.reduce((a,b)=>a+b,0);
     document.getElementById('totalCost').value=costVal.toFixed(2);
   }
-  updatePreview();
 }
 
 function updatePreview(){
   let cost=Number(document.getElementById('totalCost').value)||0;
   const bill=Number(document.getElementById('finalBill').value)||0;
   const margin=bill-cost, salary=margin*0.5;
+
+  const date=document.getElementById('workDate').value;
+  const dObj=new Date(date);
+  const formattedDate=dObj.toLocaleDateString('en-GB'); // dd-mm-yyyy
+
+  document.getElementById('previewDate').textContent=formattedDate;
   document.getElementById('previewParts').textContent=selectedPartNames.join(', ');
   document.getElementById('previewCost').textContent=fmt(cost);
   document.getElementById('previewBill').textContent=fmt(bill);
@@ -232,6 +235,7 @@ function updatePreview(){
 document.querySelectorAll('.group-img').forEach(img=>img.addEventListener('click',()=>renderParts(img.dataset.groupId)));
 document.getElementById('totalCost').addEventListener('input',()=>{manualCost=true;updatePreview();});
 document.getElementById('finalBill').addEventListener('input',updatePreview);
+document.getElementById('workDate').addEventListener('change',updatePreview);
 
 document.getElementById('saveBtn').addEventListener('click',async()=>{
   if(!workerId){alert("Please select worker.");return;}
@@ -241,10 +245,11 @@ document.getElementById('saveBtn').addEventListener('click',async()=>{
       worker_id:workerId,
       parts:selectedPartIds,
       cost:document.getElementById('totalCost').value,
-      bill:document.getElementById('finalBill').value||null
+      bill:document.getElementById('finalBill').value||null,
+      date:document.getElementById('workDate').value
     })});
   const data=await resp.json().catch(()=>({}));
-  if(data.status==='success'){alert(data.is_pending?"Saved as Pending.":"Saved as Completed.");location.href='workers_work.php?id='+workerId;}
+  if(data.status==='success'){alert(data.is_pending?"Saved as Pending.":"Saved as Completed.");location.href='add_work.php?id='+workerId;}
   else{alert("Save failed.");console.log(data);}
 });
 

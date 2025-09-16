@@ -6,6 +6,11 @@
     .salary-table th, .salary-table td { border: 1px solid #000; padding: 6px; text-align: left; }
     .salary-table th { background: #f2f2f2; }
     .footer { text-align: center; margin-top: 30px; font-style: italic; }
+    .grand-total { 
+  background: #d9edf7; 
+  font-weight: bold; 
+}
+
 </style>
 
 <div class="header">KRISHNA ENGINEERING - Worker Salary Report</div>
@@ -41,15 +46,15 @@
             <td>₹<?= number_format($e['salary'], 2) ?></td>
         </tr>
         <?php endforeach; ?>
-        <tr>
+        <tr class="grand-total">
             <th colspan="5" style="text-align:right;">Total Salary</th>
             <th>₹<?= number_format($total_salary, 2) ?></th>
         </tr>
-        <tr>
+        <tr class="grand-total">
             <th colspan="5" style="text-align:right;">Advance</th>
             <th>₹<?= number_format($advance, 2) ?></th>
         </tr>
-        <tr>
+        <tr class="grand-total">
             <th colspan="5" style="text-align:right;">Remaining</th>
             <th>₹<?= number_format($total_salary - $advance, 2) ?></th>
         </tr>

@@ -3,7 +3,7 @@
 ?>
 <style>
   body {
-    margin: 0;
+    margin-left: 0;
     font-family: Arial, sans-serif;
   }
 
@@ -84,7 +84,7 @@
   <a href="index.php" class="nav-link <?php if(basename($_SERVER['PHP_SELF'])=='index.php'){echo 'active';} ?>">🏠 Dashboard</a>
   <a href="workers_work.php" class="nav-link <?php if(basename($_SERVER['PHP_SELF'])=='workers_work.php'){echo 'active';} ?>">👷 Workers Work</a>
   <a href="customer_bill.php" class="nav-link <?php if(basename($_SERVER['PHP_SELF'])=='customer_bill.php'){echo 'active';} ?>">🔧 Repairing Bill</a>
-  <a href="#" class="nav-link <?php if(basename($_SERVER['PHP_SELF'])=='#'){echo 'active';} ?>">📑 Motor Bill</a>
+  <a href="motor_bill.php" class="nav-link <?php if(basename($_SERVER['PHP_SELF'])=='motor_bill.php'){echo 'active';} ?>">📑 Motor Bill</a>
   <a href="add_work.php" class="nav-link <?php if(basename($_SERVER['PHP_SELF'])=='add_work.php'){echo 'active';} ?>">➕ Add Work</a>
   <a href="companies.php" class="nav-link <?php if(basename($_SERVER['PHP_SELF'])=='companies.php'){echo 'active';} ?>">📊 Balance Sheet</a>
   <a href="logout.php" class="nav-link text-danger">🚪 Logout</a>
