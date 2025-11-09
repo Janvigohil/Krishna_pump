@@ -180,7 +180,7 @@ input.inline-edit.cost,input.inline-edit.bill {font-size:16px;font-weight:bold;p
               <td><?= date('d-m-Y',strtotime($l['work_date'])) ?></td>
               <td><?= htmlspecialchars($l['description']) ?></td>
               <td>₹<?= number_format($l['price'],2) ?></td>
-              <td><a href="delete_labour.php?id=<?= $l['id'] ?>&worker_id=<?= $worker_id ?>" class="btn btn-danger btn-sm">Delete</a></td>
+              <td><a href="delete_laboring.php?id=<?= $l['id'] ?>&worker_id=<?= $worker_id ?>" class="btn btn-danger btn-sm">Delete</a></td>
             </tr>
           <?php endwhile; else: ?><tr><td colspan="4" class="text-center">No lauboring work found.</td></tr><?php endif; ?>
         </tbody>
@@ -235,14 +235,22 @@ document.querySelectorAll('.inline-edit').forEach(inp=>{
 document.querySelectorAll('.delete-work').forEach(btn=>{
   btn.addEventListener('click',async e=>{
     e.preventDefault();
-    if(!confirm("Are you sure you want to delete this work?")) return;
-    const tr=btn.closest('tr');
-    const id=tr.dataset.id;
-    const res=await fetch('delete_work.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id})});
-    const data=await res.json();
-    if(data.success){tr.remove();recalcTotals();}else{alert("Delete failed!");}
+    const tr = btn.closest('tr');
+    const id = tr.dataset.id;
+    const res = await fetch('delete_work.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    const data = await res.json();
+    if (data.success) {
+      tr.remove();
+      recalcTotals();
+    }
+    // optional: silently ignore failure or log it
   });
 });
+
 </script>
 </body>
 </html>

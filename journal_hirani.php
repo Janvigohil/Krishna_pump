@@ -3,7 +3,8 @@ session_start();
 if (!isset($_SESSION['admin'])) { header("Location: login.php"); exit(); }
 require 'db_config.php';
 
-$TABLE = 'journal'; // general
+$TABLE = 'journal_hirani'; // hirani
+
 // Fetch
 $stmt = $conn->prepare("SELECT id, entry_date, details, amount FROM $TABLE ORDER BY entry_date DESC, id DESC");
 $stmt->execute();
@@ -18,20 +19,20 @@ $total = array_sum(array_column($entries, 'amount'));
   <title>General - Pending Payments | Krishna Pump</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style> /* same styles as before, trimmed for brevity */ body{background:#f4f5fa} .card{border:none;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.08)} .form-label{font-weight:600} .table thead th{background:#0dcaf0} .total-bar{background:#f8f9fa;font-weight:600;padding:10px;text-align:right;border-top:2px solid #0d6efd}</style>
+  <style> /* same styles as before, trimmed for brevity */ body{background:#f4f5fa} .card{border:none;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,.08)} .form-label{font-weight:600} .table thead th{background:#0dcaf0;} .total-bar{background:#f8f9fa;font-weight:600;padding:10px;text-align:right;border-top:2px solid #0d6efd}</style>
 </head>
 <body>
 <?php include 'sidebar.php'; ?>
 
 <div class="main" style="margin-left:250px;padding:20px;max-width:1000px;">
   <div class="mb-3 d-flex gap-2">
-    <a href="journal.php" class="btn btn-info">General</a>
-    <a href="journal_hirani.php" class="btn btn-outline-info">Hirani</a>
+    <a href="journal.php" class="btn btn-outline-info">General</a>
+    <a href="journal_hirani.php" class="btn btn-info">Hirani</a>
     <a href="journal_shivdhara.php" class="btn btn-outline-info">Shivdhara</a>
   </div>
 
   <div class="card mb-4">
-    <div class="card-header bg-info "><h5 class="mb-0">🧾 Add or Edit Pending Payment (General)</h5></div>
+    <div class="card-header bg-info"><h5 class="mb-0">🧾 Add or Edit Pending Payment (General)</h5></div>
     <div class="card-body">
       <form id="journalForm" class="row g-3" onsubmit="return false;">
         <input type="hidden" name="id" id="entryId">
@@ -48,7 +49,7 @@ $total = array_sum(array_column($entries, 'amount'));
   </div>
 
   <div class="card">
-    <div class="card-header bg-primary  d-flex justify-content-between align-items-center">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
       <h5 class="mb-0">📋 Pending Payments (General)</h5>
       <span>Total Entries: <?= count($entries) ?></span>
     </div>
@@ -112,7 +113,7 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
 
 // Delete
 async function deleteEntry(id) {
-  // if (!confirm('Are you sure you want to delete this enx1xtry?')) return;
+  // if (!confirm('Are you sure you want to delete this entry?')) return;
   try {
     const res = await fetch('delete_journal.php', {
       method: 'POST',

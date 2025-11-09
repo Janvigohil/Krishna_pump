@@ -87,7 +87,7 @@
   <a href="motor_bill.php" class="nav-link <?php if(basename($_SERVER['PHP_SELF'])=='motor_bill.php'){echo 'active';} ?>">📑 Motor Bill</a>
   <a href="add_work.php" class="nav-link <?php if(basename($_SERVER['PHP_SELF'])=='add_work.php'){echo 'active';} ?>">➕ Add Work</a>
   <a href="companies.php" class="nav-link <?php if(basename($_SERVER['PHP_SELF'])=='companies.php'){echo 'active';} ?>">📊 Balance Sheet</a>
-  <a href="journal.php" class="nav-link <?php if(basename($_SERVER['PHP_SELF'])=='journal.php'){echo 'active';} ?>"> 📓 journal</a>
+  <a href="journal.php" class="nav-link <?php if(basename($_SERVER['PHP_SELF'])=='journal.php'){echo 'active';} ?>"> 📓 General</a>
   <a href="logout.php" class="nav-link text-danger">🚪 Logout</a>
 </div>
 

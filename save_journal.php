@@ -1,22 +1,40 @@
 <?php
-session_start();
-if (!isset($_SESSION['admin'])) { echo json_encode(['status'=>'unauthorized']); exit; }
+// save_journal.php
 require 'db_config.php';
+header('Content-Type: application/json; charset=utf-8');
 
-$data = json_decode(file_get_contents("php://input"), true);
-if (!$data) { echo json_encode(['status'=>'invalid']); exit; }
+$allowed = ['journal','journal_hirani','journal_shivdhara'];
 
-$id = isset($data['id']) && $data['id'] ? (int)$data['id'] : null;
-$date = $conn->real_escape_string($data['entry_date']);
-$details = $conn->real_escape_string($data['details']);
-$amount = (float)$data['amount'];
+$input = json_decode(file_get_contents('php://input'), true);
+if (!$input) { echo json_encode(['status'=>'error','message'=>'No input']); exit; }
 
-if ($id) {
-  $q = "UPDATE journal SET entry_date='$date', details='$details', amount='$amount' WHERE id=$id";
-} else {
-  $q = "INSERT INTO journal (entry_date, details, amount) VALUES ('$date', '$details', '$amount')";
+$table = $input['table'] ?? '';
+if (!in_array($table, $allowed, true)) { echo json_encode(['status'=>'error','message'=>'Invalid table']); exit; }
+
+$id = isset($input['id']) && $input['id'] !== '' ? (int)$input['id'] : 0;
+$entry_date = $input['entry_date'] ?? '';
+$details = $input['details'] ?? '';
+$amount = isset($input['amount']) ? (float)$input['amount'] : 0;
+
+if (!$entry_date || !$details || $amount <= 0) {
+    echo json_encode(['status'=>'error','message'=>'Missing or invalid fields']);
+    exit;
 }
 
-if ($conn->query($q)) echo json_encode(['status'=>'success']);
-else echo json_encode(['status'=>'error', 'error'=>$conn->error]);
-?>
+if ($id > 0) {
+    // Update
+    $sql = "UPDATE $table SET entry_date=?, details=?, amount=? WHERE id=?";
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) { echo json_encode(['status'=>'error','message'=>$conn->error]); exit; }
+    $stmt->bind_param('ssdi', $entry_date, $details, $amount, $id);
+    $ok = $stmt->execute();
+    echo json_encode(['status' => $ok ? 'success' : 'error', 'message' => $ok ? '' : $stmt->error ]);
+} else {
+    // Insert
+    $sql = "INSERT INTO $table (entry_date, details, amount) VALUES (?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) { echo json_encode(['status'=>'error','message'=>$conn->error]); exit; }
+    $stmt->bind_param('ssd', $entry_date, $details, $amount);
+    $ok = $stmt->execute();
+    echo json_encode(['status' => $ok ? 'success' : 'error', 'message' => $ok ? '' : $stmt->error ]);
+}
